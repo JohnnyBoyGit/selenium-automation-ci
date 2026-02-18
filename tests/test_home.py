@@ -2,7 +2,7 @@ import pytest
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
-import time
+
 
 @pytest.mark.usefixtures("setup_logger")
 class TestHomePage:
@@ -91,64 +91,93 @@ class TestCarousel:
     def test_slide_footer_rating(self, home):
         self.logger.info("--- START: Carousel Footer Rating Verification ---")
         home.navigate()
-         
-         # 1. Trigger Hydration
-        self.logger.info("Triggering Carousel Hydration (Scroll/Resize/Hover)")
-        home.driver.execute_script("window.scrollTo(0, 5000);")
-        home.driver.execute_script("window.dispatchEvent(new Event('resize'));")
-        ActionChains(home.driver).move_by_offset(10, 10).perform()
+        
+        # 1. Trigger Hydration
+        self.logger.info("Triggering Carousel Hydration...")
+        try:
+            widget = home.driver.find_element(By.CLASS_NAME, "ti-widget")
+            home.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", widget)
+            ActionChains(home.driver).move_to_element(widget).pause(0.5).perform()
+        except:
+            home.driver.execute_script("window.scrollTo(0, 5000);")
+            # Fallback: Move to a safe offset if the specific class isn't found
+            ActionChains(home.driver).move_by_offset(10, 10).perform()
 
-        # 2. WAIT for the footer area to exist first
-        # This ensures the JavaScript has actually rendered the footer
+        # 2. WAIT for the footer area to exist
         self.logger.info("Waiting for Trustindex footer to render...")
         home.wait.until(
             EC.presence_of_element_located((By.CLASS_NAME, "ti-footer")),
             "The Trustindex footer never loaded."
         )
 
-        # 3. Assertions (Now they will find the elements)
+        # 3. Assertions
         self.logger.info("Verifying footer rating elements...")
         assert home.element_is_visible(home.CAROUSEL_RATING), "Rating is not visible"
         assert home.element_is_visible(home.CAROUSEL_RATING_STARS), "Rating stars are not visible"
         assert home.element_is_visible(home.CAROUSEL_RATING_TEXT), "Rating text is not visible"
         assert home.element_is_visible(home.CAROUSEL_RATING_LOGO), "Rating logo is not visible"
-        rating = home.driver.find_element(*home.CAROUSEL_RATING).text
-        self.logger.info(f"Captured Footer Rating: {rating}")
-        assert "EXCELLENT" in rating.text
+        
+        # 4. Fixed logic: rating is a string, check membership directly
+        rating_text = home.driver.find_element(*home.CAROUSEL_RATING).text
+        self.logger.info(f"Captured Footer Rating: {rating_text}")
+        
+        # Use .upper() to make the test case-insensitive and robust
+        assert "EXCELLENT" in rating_text.upper(), f"Expected 'EXCELLENT' not found in: {rating_text}"
 
         self.logger.info("--- FINISH: Carousel Footer Rating Verification ---")
+
 
     def test_next_navigation(self, home):
         self.logger.info("--- START: Carousel Next Button Navigation Test ---")
         home.navigate()
 
-        # 1. Trigger Hydration
-        self.logger.info("Triggering Carousel Hydration (Scroll/Resize/Hover)")
-        home.driver.execute_script("window.scrollTo(0, 5000);")
-        home.driver.execute_script("window.dispatchEvent(new Event('resize'));")
-        ActionChains(home.driver).move_by_offset(10, 10).perform()
+        # 1. Trigger Hydration & Scroll
+        self.logger.info("Triggering Carousel Hydration via Scroll & Hover...")
+        try:
+            widget = home.driver.find_element(By.CLASS_NAME, "ti-widget")
+            home.driver.execute_script("arguments.scrollIntoView({block: 'center'});", widget)
+            home.driver.execute_script("window.dispatchEvent(new Event('scroll'));")
+            # Your added line: High-accuracy hover
+            ActionChains(home.driver).move_to_element(widget).pause(0.5).perform()
+            self.logger.info("Targeted hover successful.")
+        except Exception as e:
+            self.logger.warning(f"Could not find widget, falling back: {e}")
+            home.driver.execute_script("window.scrollTo(0, 5000);")
+            # Your added line: General activity hover
+            ActionChains(home.driver).move_by_offset(10, 10).perform()
 
-        # 2. Get Initial Name
-        self.logger.info("Waiting for active slide to render...")
-        home.wait.until(lambda d: home.get_active_slide() is not None)
-        initial_name = home.get_active_slide().find_element(By.CLASS_NAME, "ti-name").text
+        # 2. Wait for the ACTIVE slide content to be visible
+        name_locator = (By.CLASS_NAME, "ti-name")
+        self.logger.info("Waiting for active slide content...")
+        
+        # We wait specifically for the text element inside the active slide
+        home.wait.until(
+            EC.visibility_of_element_located(name_locator),
+            "Review content (ti-name) did not become visible."
+        )
+        
+        initial_name = home.get_active_slide().find_element(*name_locator).text
+        self.logger.info(f"Initial slide detected: {initial_name}")
 
-        # 3. Click Next via JS
-        next_btn = home.driver.find_element(*home.NEXT_BUTTON)("Clicking Next button via JS...")
-        self.logger.info("Clicking Next button to move forward...")
+        # 3. Click Next via JS (Using the button locator from your 'home' object)
+        self.logger.info("Clicking Next button...")
+        next_btn = home.driver.find_element(*home.NEXT_BUTTON)
         home.driver.execute_script("arguments[0].click();", next_btn)
 
-        # 4. Wait for the slide content to change("Waiting for slide content to change...")
+        # 4. Wait for the slide content to change
+        # This is the most important part for stability
         home.wait.until(
-            lambda d: home.get_active_slide().find_element(By.CLASS_NAME, "ti-name").text != initial_name
+            lambda d: home.get_active_slide().find_element(*name_locator).text != initial_name,
+            message=f"Slide text stayed as '{initial_name}' after clicking next."
         )
 
-        # 5. Assertion
-        new_name = home.get_active_slide().find_element(By.CLASS_NAME, "ti-name").text
-        assert new_name != initial_name, f"Next failed: slide name is still {initial_name}"
+        # 5. Final Assertion
+        new_name = home.get_active_slide().find_element(*name_locator).text
+        assert new_name != initial_name, "Navigation failed: New name matches initial name."
         self.logger.info(f"Navigation successful. New slide: {new_name}")
 
         self.logger.info("--- FINISH: End of Carousel Next Button Navigation Test ---")
+
 
 
     def test_prev_navigation(self, home):
