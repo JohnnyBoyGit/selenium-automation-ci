@@ -1,0 +1,21 @@
+{
+  "args": { "movieName": "Top Gun" },
+  "data": { "actorName": "Tom Cruise" },
+  "files": {},
+  "form": {},
+  "headers": {
+    "host": "postman-echo.com",
+    "content-length": "33",
+    "accept-encoding": "gzip, br",
+    "cache-control": "no-cache",
+    "x-forwarded-proto": "https",
+    "accept": "*/*",
+    "user-agent": "PostmanRuntime/7.51.1",
+    "student-expert": "skillcheck",
+    "content-type": "application/json",
+    "postman-token": "e280fd6f-c26b-4287-b9e6-c50a8123b5b9",
+    "cookie": "__cf_bm=4KSZjtrEq1SHobxIWe3RoG8IbrCd4ZyQXPI09XIWQ0Y-1771284556-1.0.1.1-CzsRS3oCqTksnHJcf1DlogNrBmhw5ZvR8grKySMHbd5nE._Lk.1BCG6F9ueAHh6sHnhjBbnuTaxS70kbMzV7BajpLtbwnw8IsQ5KWPWhELE; _cfuvid=fu1OO6aBdw11eURzeSzXExGTrYcCty_qHmbe1sGcSus-1771284556527-0.0.1.1-604800000; sails.sid=s%3ADMsc1mwAIOzZkhW-0Nj3lRCBzau6XqVP.y7ULG%2FkOfEmJhV%2BEP%2Bfujt7nulWIfHtxDSM54%2FN%2BrB4"
+  },
+  "json": { "actorName": "Tom Cruise" },
+  "url": "https://postman-echo.com/post?movieName=Top%20Gun"
+}

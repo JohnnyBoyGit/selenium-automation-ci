@@ -1,0 +1,19 @@
+# Created by venv; see https://docs.python.org/3/library/venv.html
+# Use * to ignore all files in the directory
+
+# Environments
+.venv/
+
+# Python & Pytest temp files
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Logs and Documentation    If you wish to remove all but keep specific ones, use negation patterns like !README.md.
+*.log
+*.md
+!README.md
+
+# Test Reports
+reports/
+
