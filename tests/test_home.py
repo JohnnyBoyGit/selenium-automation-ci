@@ -179,7 +179,6 @@ class TestCarousel:
         self.logger.info("--- FINISH: End of Carousel Next Button Navigation Test ---")
 
 
-
     def test_prev_navigation(self, home):
         self.logger.info("--- START: Carousel Previous Button Navigation Test ---")
         home.navigate()
