@@ -1,0 +1,29 @@
+name: Selenium Python CI
+on: [push] # Runs automatically every time you push code
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          pip install selenium pytest pytest-html
+
+      - name: Run Selenium Tests
+        # This generates the 'report.html' file
+        run: pytest --html=report.html --self-contained-html
+
+      - name: Save Test Report as Artifact
+        if: always() # Ensures report is saved even if tests fail
+        uses: actions/upload-artifact@v4
+        with:
+          name: selenium-test-report
+          path: report.html
