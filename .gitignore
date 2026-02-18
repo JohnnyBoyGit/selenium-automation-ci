@@ -13,6 +13,7 @@ __pycache__/
 *.log
 *.md
 !README.md
+logs/screenshots/*.png
 
 # Test Reports
 reports/
