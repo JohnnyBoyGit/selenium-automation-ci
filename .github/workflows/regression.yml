@@ -27,15 +27,17 @@ jobs:
         with:
           name: selenium-test-report
           path: report.html
-          
+
       - name: Run Tests with Report
         run: |
           pytest --html=reports/report.html --self-contained-html
         if: always() # Ensures reports are generated even if tests fail
 
-      - name: Upload Test Report Artifact
+      - name: Upload Test Report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: selenium-test-report
+          name: selenium-test-report-${{ github.run_number }} # Adds a unique number
           path: reports/report.html
+          overwrite: true # Specifically tells GitHub to replace if it exists
+
