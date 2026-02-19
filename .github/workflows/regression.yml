@@ -1,5 +1,8 @@
 name: Selenium Python CI
-on: [push] # Runs automatically every time you push code
+on: 
+  push:
+    branches: [ main ]
+  workflow_dispatch: # This adds the "Run workflow" button
 
 jobs:
   test:
@@ -17,27 +20,19 @@ jobs:
         run: |
           pip install selenium pytest pytest-html
 
+      - name: Create Reports Directory
+        run: mkdir -p reports
+
       - name: Run Selenium Tests
-        # This generates the 'report.html' file
-        run: pytest --html=report.html --self-contained-html
+        # Generates a single, self-contained report in the reports folder
+        run: pytest --html=reports/report.html --self-contained-html
+        if: always()
 
-      - name: Save Test Report as Artifact
-        if: always() # Ensures report is saved even if tests fail
-        uses: actions/upload-artifact@v4
-        with:
-          name: selenium-test-report
-          path: report.html
-
-      - name: Run Tests with Report
-        run: |
-          pytest --html=reports/report.html --self-contained-html
-        if: always() # Ensures reports are generated even if tests fail
-
-      - name: Upload Test Report
+      - name: Upload Test Report Artifact
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: selenium-test-report-${{ github.run_number }} # Adds a unique number
+          name: selenium-test-report-run-${{ github.run_number }}
           path: reports/report.html
-          overwrite: true # Specifically tells GitHub to replace if it exists
+          overwrite: true  # Optional safety net
 
