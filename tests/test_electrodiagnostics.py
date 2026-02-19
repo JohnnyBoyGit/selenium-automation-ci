@@ -37,6 +37,6 @@ class TestElectroDiagnosticsPage:
 
     def test_schedule_now_link(self, electro_diagnostics):        
         self.logger.info("--- START: ElectroDiagnostics Schedule Now Test ---")       
-        electro_diagnostics.sch_now_link_flow(electro_diagnostics)
+        electro_diagnostics.sch_now_link_flow()
         self.logger.info("--- FINISH: ElectroDiagnostics Schedule Now Test ---")
 

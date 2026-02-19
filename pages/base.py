@@ -1,4 +1,6 @@
 import logging
+from time import time
+from time import sleep  # Import the specific function
 import pytest
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
@@ -38,15 +40,30 @@ class BasePage:
         self.logger.info(f"Finding element: {locator}")
         return self.wait.until(EC.visibility_of_element_located(locator))
 
+    from time import sleep # Direct import to avoid 'builtin_function_or_method' error
+
     def safe_click(self, locator):
         self.logger.info(f"Attempting safe_click on: {locator}")
+        
+        # 1. Force a scroll to the bottom to 'wake up' the footer
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        sleep(1) # Wait for footer animation/render to finish
+        
+        # 2. Wait for the element specifically
         element = self.wait.until(EC.element_to_be_clickable(locator))
+        
+        # 3. Ensure it's centered in the viewport
+        self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+        sleep(0.5)
+
         try:
             element.click()
             self.logger.info("Native click successful.")
         except Exception:
-            self.logger.warning("Native click failed, attempting JS fallback click.")
+            self.logger.warning("Native click blocked; using JS fallback.")
+            # Ensure 'element' is passed correctly into the JS script
             self.driver.execute_script("arguments[0].click();", element)
+
 
     def force_click(self, locator):
         self.logger.info(f"Executing force_click (JS) on: {locator}")
@@ -113,7 +130,8 @@ class BasePage:
         self.scroll_to_element(locator)
 
         # 3. Click and handle tabs
-        self.force_click(locator)
+        #self.force_click(locator)
+        self.safe_click(locator)
         self.handle_external_tab()
 
         # 4. Wait for URL change

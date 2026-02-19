@@ -18,3 +18,4 @@ logs/screenshots/*.png
 # Test Reports
 reports/
 
+tests/test_global_elements.py
