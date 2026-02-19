@@ -30,8 +30,12 @@ class TestHeader:   # Simple class, no inheritance needed.
         # 2. Click the element
         # If it's a submenu item, we might need to hover first
         if "SUBMENU" in button_name:
+            self.logger.info(f"Hovering over Services menu...")
             home.header.hover(home.header.SERVICES_MENU_ITEM)
-        home.header.safe_click(locator)
+            # Ensure the submenu is visible before clicking
+            home.wait.until(EC.visibility_of_element_located(locator))
+
+        home.header.quick_click(locator)
         
         # 3. Handle the new tab if it opens
         home.handle_external_tab()

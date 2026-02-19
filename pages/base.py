@@ -64,6 +64,21 @@ class BasePage:
             # Ensure 'element' is passed correctly into the JS script
             self.driver.execute_script("arguments[0].click();", element)
 
+    def quick_click(self, locator):
+        """Wait and click without scrolling—best for Header/Nav menus."""
+        self.logger.info(f"Attempting quick_click on: {locator}")
+        # 1. Wait for visibility/clickability
+        element = self.wait.until(EC.element_to_be_clickable(locator))
+        
+        try:
+            # 2. Native click first
+            element.click()
+            self.logger.info("Quick native click successful.")
+        except Exception:
+            # 3. JS Fallback if something (like a transparent overlay) is in the way
+            self.logger.warning("Quick click failed, using JS fallback.")
+            self.driver.execute_script("arguments[0].click();", element)
+
 
     def force_click(self, locator):
         self.logger.info(f"Executing force_click (JS) on: {locator}")
