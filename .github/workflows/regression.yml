@@ -27,3 +27,15 @@ jobs:
         with:
           name: selenium-test-report
           path: report.html
+          
+      - name: Run Tests with Report
+        run: |
+          pytest --html=reports/report.html --self-contained-html
+        if: always() # Ensures reports are generated even if tests fail
+
+      - name: Upload Test Report Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: selenium-test-report
+          path: reports/report.html
