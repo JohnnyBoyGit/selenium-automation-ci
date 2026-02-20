@@ -1,7 +1,7 @@
 
 # CaliPain Automation Suite
 <!-- 1. THE STATUS BADGE (Paste the code you copied from GitHub Actions here) -->
-[![Selenium Python CI](https://github.com/[JohnnyBoyGit]/[selenium-automation-ci]/actions/workflows/regression.yml/badge.svg)](https://github.com/[JohnnyBoyGit]/[selenium-automation-ci]/actions/workflows/regression.yml)
+[![Selenium Python CI](https://github.com/JohnnyBoyGit/selenium-automation-ci/actions/workflows/regression.yml/badge.svg)](https://github.com/JohnnyBoyGit/selenium-automation-ci/actions/workflows/regression.yml)
 
 ## 🚀 Project Overview
 This repository contains a professional-grade **CI/CD Automation Pipeline** for the [CaliPain.com](https://calipain.com) platform. Built with **Python** and **Selenium**, the suite is fully integrated into **GitHub Actions** to ensure continuous site health.
@@ -21,7 +21,7 @@ The pipeline is designed for high reliability in **headless environments**:
 * **Stability:** Features custom `safe_click` and `quick_click` synchronization logic to handle lazy-loading and dynamic UI components.
 
 ## 📊 How to View Reports
-1. Navigate to the [Actions Tab](https://github.com/[JohnnyBoyGit]/[selenium-automation-ci]/actions).
+1. Navigate to the [Actions Tab](https://github.com/JohnnyBoyGit/selenium-automation-ci/actions).
 2. Click on the most recent **Workflow Run**.
 3. Scroll down to **Artifacts** and download `selenium-test-report`.
 4. Unzip and open `report.html` in any browser.
