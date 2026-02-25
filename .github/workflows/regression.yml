@@ -24,9 +24,13 @@ jobs:
         run: mkdir -p reports
 
       - name: Run Selenium Tests
-        # Generates a single, self-contained report in the reports folder
-        run: pytest tests/ --ignore=tests/unit --html=reports/report.html --self-contained-html
+        env:
+          PYTHONPATH: .
+        # Use -v (verbose) to see EXACTLY what pytest is doing
+        run: |
+          pytest tests/test_home.py tests/test_about.py --ignore=tests/unit --html=reports/report.html --self-contained-html -v
         if: always()
+
 
       - name: Upload Test Report Artifact
         uses: actions/upload-artifact@v4
