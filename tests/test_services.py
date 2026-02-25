@@ -1,17 +1,19 @@
 import pytest
 from selenium.webdriver.support import expected_conditions as EC
 from pages.services import ServicesPage
+from src.logic.services_logic import ServicesLogic
 
 @pytest.mark.usefixtures("setup_logger")
 class TestServicesPage:
 
-    @pytest.mark.parametrize("image_key", ServicesPage.IMAGE_DATA.keys())
+    @pytest.mark.parametrize("image_key", ServicesLogic.get_all_image_keys())
     def test_image_links(self, services, image_key):
-        self.logger.info("--- START: Services Image Links Test ---")
+        self.logger.info("--- START: Services Image Links Test for {image_key}---")
         services.navigate() 
         
-        locator = services.locator_by_link_slug(services.IMAGE_DATA[image_key])
-        expected_url = services.IMAGE_DATA[image_key]
+        # Logic Layer provides the expected slug
+        expected_slug = ServicesLogic.get_slug(image_key)
+        locator = services.locator_by_link_slug(expected_slug)
         
         # Scroll to the image so the browser "activates" the link
         self.logger.info(f"Scrolling to image link: {locator}")
@@ -20,25 +22,15 @@ class TestServicesPage:
         # FIX: Remove .header. so it searches the whole page
         self.logger.info(f"Clicking image link for {image_key} with force_click: {locator}")
         services.force_click(locator)
-        print(services.driver.current_url)
+
         self.logger.info("Handling external tab if opened...")
         services.handle_external_tab()
         
-        try:
-            # 2026 Tip: URL waits are more stable than raw asserts
-            services.wait.until(EC.url_contains(expected_url))
-        except:
-            actual = services.driver.current_url
-            pytest.fail(f"Link {image_key} failed. Expected slug '{expected_url}' but got '{actual}'")
+        # One line that waits AND asserts. 
+        # If it fails, Selenium throws a 'TimeoutException' which Pytest marks as a failure automatically.
+        services.wait.until(EC.url_contains(expected_slug), f"Expected slug '{expected_slug}' not found in {services.driver.current_url}")
         
-        # Cleanup tabs
-        if len(services.driver.window_handles) > 1:
-            self.logger.info("Closing extra tab and switching back to original.")
-            services.driver.close()
-            services.driver.switch_to.window(services.driver.window_handles[0])
-            self.logger.info("Switched back to original tab.")
-
-        self.logger.info("--- FINISH: Services Image Links Test ---")
+        self.logger.info("--- FINISH: Services Image Links Test for {image_key}---")
 
     @pytest.mark.parametrize("service_key", ServicesPage.APPOINTMENT_DATA.keys())   # use the keys from APPOINTMENT_DATA dictionary
     def test_appointment_links(self, services, service_key):

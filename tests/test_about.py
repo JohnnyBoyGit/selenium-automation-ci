@@ -1,6 +1,7 @@
 import pytest
 from selenium.webdriver.support import expected_conditions as EC
 from pages.about import AboutPage
+from src.logic.about_logic import AboutLogic
 
 @pytest.mark.usefixtures("setup_logger")
 class TestAboutPage:
@@ -10,17 +11,33 @@ class TestAboutPage:
         assert about.element_is_visible(AboutPage.ABOUT_US_TITLE), "About Us title is not visible"
         self.logger.info("--- FINISH: About Us Title Test ---")
 
-    def test_phone(self, about):
-        self.logger.info("--- START: About Us Phone Test ---")
+    def test_phone_visibility_and_format(self, about):
+        self.logger.info("--- START: Phone Visibility & Format Test ---")
         about.navigate()
-        assert about.element_is_visible(AboutPage.PHONE), "Phone is not visible"
-        self.logger.info("--- FINISH: About Us Phone Test ---")
+        
+        # 1. Check Visibility (Your original check)
+        assert about.element_is_visible(AboutPage.PHONE), "Phone element not visible"
+        
+        # 2. Check Content (The new "Senior" check)
+        raw_text = about.driver.find_element(*AboutPage.PHONE).text
+        assert AboutLogic.is_valid_phone_format(raw_text), f"Phone text '{raw_text}' is not a valid format"
+        
+        self.logger.info("Phone visibility and format verified.")
 
-    def test_address(self, about):
-        self.logger.info("--- START: About Us Address Test ---")
+        self.logger.info("--- FINISH: Phone Visibility & Format Test ---")
+
+    def test_address_visibility_and_validation(self, about):
+        self.logger.info("--- START: About Us Address Visibility & Validation Test ---")
         about.navigate()
+
         assert about.element_is_visible(AboutPage.ADDRESS), "Address is not visible"
-        self.logger.info("--- FINISH: About Us Address Test ---")
+
+        raw_text = about.driver.find_element(*AboutPage.ADDRESS).text
+        assert AboutLogic.is_valid_address(raw_text), f"Address text '{raw_text}' does not appear valid"
+        
+        self.logger.info("Address visibility and validation verified.")
+        
+        self.logger.info("--- FINISH: About Us Address Visibility & Validation Test ---")
 
     def test_phone_icon(self, about):
         self.logger.info("--- START: About Us Phone Icon Test ---")
@@ -42,7 +59,7 @@ class TestAboutPage:
 
         locator = AboutPage.BUTTON_BOOK_AN_APPOINTMENT
 
-        expected_url = "booking"
+        expected_url = AboutLogic.get_url_expectation("APPOINTMENT_LINK")
         
         # Scroll to the image so the browser "activates" the link
         self.logger.info(f"Scrolling to appointment link: {locator}")

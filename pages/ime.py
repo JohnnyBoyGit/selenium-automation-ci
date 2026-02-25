@@ -1,5 +1,6 @@
 from selenium.webdriver.common.by import By
 from pages.base import BasePage
+from src.logic.ime_logic import ImeLogic
 
 class ImePage(BasePage):
 
@@ -19,4 +20,4 @@ class ImePage(BasePage):
 
     def navigate(self):
         """Specific navigation for this page."""
-        self.open_url("/independent-medical-exams-2") # Uses the helper from BasePage
+        self.open_url(ImeLogic.EXPECTED_PATH) # Uses the helper from BasePage

@@ -1,5 +1,6 @@
 from selenium.webdriver.common.by import By
 from pages.base import BasePage
+from src.logic.lifestyle_medicine_logic import LifestyleMedicineLogic
 
 class LifestyleMedicinePage(BasePage):    # Lifestyle Medicine Page
 
@@ -28,5 +29,5 @@ class LifestyleMedicinePage(BasePage):    # Lifestyle Medicine Page
         super().__init__(driver)
 
     def navigate(self):
-        """Specific navigation for this page."""
-        self.open_url("/lifestyle-medicine-2") # Uses the helper from BasePage
+        """Uses the Logic Layer to navigate to this page."""
+        self.open_url(LifestyleMedicineLogic.EXPECTED_PATH)

@@ -1,5 +1,6 @@
 from selenium.webdriver.common.by import By
 from pages.base import BasePage
+from src.logic.services_logic import ServicesLogic
 
 class ServicesPage(BasePage):
 
@@ -28,12 +29,12 @@ class ServicesPage(BasePage):
         super().__init__(driver)
 
     def navigate(self):
-        """Specific navigation for this page."""
-        self.open_url("/services") # Uses the helper from BasePage
+        """Uses the Logic Layer to navigate to this page."""
+        self.open_url(ServicesLogic.EXPECTED_PATH)
 
     def get_appointment_locator(self, key):
         """Builds the locator dynamically using the data-id."""
-        data_id = self.APPOINTMENT_DATA.get(key)
+        data_id = ServicesLogic.get_data_id(key) # Get from Logic
         return (By.CSS_SELECTOR, f"[data-id='{data_id}'] a")
     
     def locator_by_link_slug(self, slug):

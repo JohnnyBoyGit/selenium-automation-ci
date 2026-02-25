@@ -1,5 +1,6 @@
 from selenium.webdriver.common.by import By
 from pages.base import BasePage
+from src.logic.about_logic import AboutLogic
 
 class AboutPage(BasePage):
 
@@ -18,6 +19,6 @@ class AboutPage(BasePage):
         super().__init__(driver)
 
     def navigate(self):
-        self.open_url("/about") # Uses the helper from BasePage
+        self.open_url(AboutLogic.EXPECTED_PATH) # Uses the helper from BasePage
 
 

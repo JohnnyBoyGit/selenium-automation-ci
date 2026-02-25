@@ -113,6 +113,24 @@ def driver(request):
     
     driver.quit()
 
+@pytest.fixture(autouse=True)
+def cleanup_tabs(driver):
+    """
+    This fixture runs AFTER every test automatically.
+    It ensures we start every test with only ONE tab.
+    """
+    yield # This is where the test actually runs
+    
+    # --- AFTER THE TEST (PASS OR FAIL) ---
+    handles = driver.window_handles
+    if len(handles) > 1:
+        # Keep the original window, close all others
+        for handle in handles[1:]:
+            driver.switch_to.window(handle)
+            driver.close()
+        # Always switch back to the main window handle
+        driver.switch_to.window(handles[0])
+        
 # This is the original driver fixture that initializes and tears down the Selenium WebDriver.
 # @pytest.fixture(scope="function")
 # def driver(request):

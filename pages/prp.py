@@ -1,5 +1,6 @@
 from selenium.webdriver.common.by import By
 from pages.base import BasePage
+from src.logic.prp_logic import PrpLogic
 
 class PrpPage(BasePage):    # Platelet-Rich Plasma Page
 
@@ -19,5 +20,5 @@ class PrpPage(BasePage):    # Platelet-Rich Plasma Page
 
 
     def navigate(self):
-        """Overrides BasePage logic to go to the PRP specific URL."""
-        self.open_url("platelet-rich-plasma-prp")
+        # Use the logic layer for the path
+        self.open_url(PrpLogic.EXPECTED_PATH)

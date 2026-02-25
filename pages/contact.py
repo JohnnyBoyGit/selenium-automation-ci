@@ -1,5 +1,6 @@
 from selenium.webdriver.common.by import By
 from pages.base import BasePage
+from src.logic.contact_logic import ContactLogic
 
 class ContactPage(BasePage):
 
@@ -19,5 +20,5 @@ class ContactPage(BasePage):
         super().__init__(driver)
 
     def navigate(self):
-        """Specific navigation for this page."""
-        self.open_url("/contact") # Uses the helper from BasePage
+        """Uses the Logic Layer to navigate home."""
+        self.open_url(ContactLogic.EXPECTED_PATH) 

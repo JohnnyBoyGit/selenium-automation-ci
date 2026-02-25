@@ -109,14 +109,32 @@ class BasePage:
         )
         self.wait.until(EC.visibility_of_element_located(locator))
 
-    def handle_external_tab(self):
-        self.logger.info("Checking for new browser tabs/windows.")
-        if len(self.driver.window_handles) > 1: # Checks if the number of currently opened tabs is more than 1
-            self.driver.switch_to.window(self.driver.window_handles[-1]) # Switches to the last opened tab
-            self.logger.info(f"Switched to new tab. Current URL: {self.driver.current_url}")
+    from selenium.webdriver.support.ui import WebDriverWait
+
+    def handle_external_tab(self, timeout=10):
+        """
+        Senior approach: Wait for the tab handle to exist before switching.
+        This eliminates race conditions.
+        """
+        self.logger.info(f"Waiting up to {timeout}s for a new tab to appear...")
+        
+        try:
+            # 1. Wait until the count of windows is at least 2
+            WebDriverWait(self.driver, timeout).until(
+                lambda d: len(d.window_handles) > 1
+            )
+            
+            # 2. Switch to the last handle (the newest tab)
+            new_handle = self.driver.window_handles[-1]
+            self.driver.switch_to.window(new_handle)
+            
+            self.logger.info(f"Switched to new tab: {self.driver.current_url}")
             return True
-        self.logger.warning("No external tab found to switch to.")
-        return False
+        
+        except Exception:
+            self.logger.error("TIMEOUT: New tab did not appear within the allotted time.")
+            return False
+
 
     def hover(self, locator):
         self.logger.info(f"Hovering over: {locator}")

@@ -1,29 +1,20 @@
 import pytest
 from selenium.webdriver.support import expected_conditions as EC
+from src.logic.footer_logic import FooterLogic
+
 
 @pytest.mark.usefixtures("setup_logger")
 class TestFooter:   # Simple class, no inheritance needed.
     
-    FOOTER_DATA = [
-        ("FOOTER_SOCIAL_MEDIA_FACEBOOK", "facebook.com"),
-        ("FOOTER_SOCIAL_MEDIA_INSTAGRAM", "instagram.com"),
-        ("FOOTER_SOCIAL_MEDIA_GOOGLE", "Joseph+Hadi"),
-        ("FOOTER_SOCIAL_MEDIA_TWITTER", "x.com/joehadimd"),
-        pytest.param("FOOTER_QUICK_LINKS_ABOUT_US", "about", marks=pytest.mark.xfail(reason="Site link currently 404/Broken")),
-        pytest.param("FOOTER_QUICK_LINKS_APPOINTMENTS", "booking", marks=pytest.mark.xfail(reason="Site link currently 404/Broken")),
-        pytest.param("FOOTER_QUICK_LINKS_CONTACT_US", "contact", marks=pytest.mark.xfail(reason="Site link currently 404/Broken")),
-        ("FOOTER_QUICK_LINKS_SERVICES", "services"),
-        ("FOOTER_SERVICES_PAIN_MANAGEMENT", "pain-management"),
-        ("FOOTER_SERVICES_ELECTRODIAGNOSTICS", "electrodiagnostic"),
-        ("FOOTER_SERVICES_IME", "independent-medical-exams"),
-        ("FOOTER_SERVICES_PLATELET_RICH_PLASMA", "platelet-rich-plasma-prp"),
-        ("FOOTER_SERVICES_INFUSION_THERAPY", "infusion-therapy"),
-        ("FOOTER_SERVICES_LIFESTYLE_MEDICINE", "lifestyle-medicine"),
-        ("FOOTER_PRIVACY_POLICY", "privacy-policy"),
-        ("FOOTER_TERMS_AND_CONDITIONS", "terms")      
-]
+    # Senior Move: Combine valid and broken links with marks dynamically
+    FOOTER_PARAMS = [
+        (k, v) for k, v in FooterLogic.NAV_MAP.items()
+    ] + [
+        pytest.param(k, v, marks=pytest.mark.xfail(reason="Site 404")) 
+        for k, v in FooterLogic.BROKEN_LINKS.items()
+    ]
 
-    @pytest.mark.parametrize("button_name, expected_url", FOOTER_DATA)
+    @pytest.mark.parametrize("button_name, expected_url", FOOTER_PARAMS)
     def test_link_navigation(self, home, button_name, expected_url):
         """Verifies that each link redirects to the correct destination."""
         home.navigate()
@@ -38,12 +29,7 @@ class TestFooter:   # Simple class, no inheritance needed.
         home.handle_external_tab()
         
         # 4. Assert the result
-        try:
-            home.wait.until(EC.url_contains(expected_url))
-        except:
-            pytest.fail(f"Link {button_name} failed. Expected '{expected_url}' but got '{home.driver.current_url}'")
-        
-        # 5. Optional Cleanup: If it was a new tab, close it
-        if len(home.driver.window_handles) > 1:
-            home.driver.close()
-            home.driver.switch_to.window(home.driver.window_handles[0])
+        home.wait.until(
+            EC.url_contains(expected_url), 
+            f"Footer link {button_name} failed. URL: {home.driver.current_url}"
+        )

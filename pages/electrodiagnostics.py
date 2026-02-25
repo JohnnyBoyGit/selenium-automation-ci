@@ -1,5 +1,6 @@
 from selenium.webdriver.common.by import By
 from pages.base import BasePage
+from src.logic.electrodiagnostics_logic import ElectroDiagnosticsLogic
 
 class ElectroDiagnosticsPage(BasePage):
 
@@ -18,5 +19,5 @@ class ElectroDiagnosticsPage(BasePage):
         super().__init__(driver)
 
     def navigate(self):
-        """Specific navigation for this page."""
-        self.open_url("/electrodiagnostic") # Uses the helper from BasePage
+        """Uses the Logic Layer to navigate to this page."""
+        self.open_url(ElectroDiagnosticsLogic.EXPECTED_PATH)

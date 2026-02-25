@@ -1,5 +1,6 @@
 from selenium.webdriver.common.by import By
 from pages.base import BasePage
+from src.logic.infusion_therapy_logic import InfusionTherapyLogic
 
 class InfusionTherapyPage(BasePage):
 
@@ -18,5 +19,5 @@ class InfusionTherapyPage(BasePage):
         super().__init__(driver)
 
     def navigate(self):
-        """Specific navigation for this page."""
-        self.open_url("/infusion-therapy-2") # Uses the helper from BasePage
+        """Uses the Logic Layer to navigate to this page."""
+        self.open_url(InfusionTherapyLogic.EXPECTED_PATH)

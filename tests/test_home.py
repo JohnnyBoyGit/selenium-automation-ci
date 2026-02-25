@@ -2,7 +2,7 @@ import pytest
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
-
+from src.logic.home_logic import HomeLogic
 
 @pytest.mark.usefixtures("setup_logger")
 class TestHomePage:
@@ -22,41 +22,29 @@ class TestHomePage:
         assert home.footer.element_is_visible(home.footer.FOOTER_SOCIAL_MEDIA_TWITTER), "Social media links are not visible"    
         self.logger.info("Header and Footer verification complete.")
 
+
     @pytest.mark.parametrize("button_locator", [
         "BUTTON_READ_ME",
         "BUTTON_VIEW_ALL_SERVICES"
     ])
-
     def test_buttons_navigation(self, home, button_locator):
         self.logger.info(f"--- START: Navigation Test for {button_locator} ---")
         home.navigate()
-        # 1. Get the locator
+
         locator = getattr(home, button_locator)
-    
-        # 2. Scroll and Verify Visibility (Your current logic)
-        self.logger.info(f"Scrolling to and clicking {button_locator}")
         home.scroll_to_element(locator)
         assert home.element_is_visible(locator), f"{button_locator} is not visible"
 
-        # 3. Click the button
-        self.logger.info(f"Clicking on {button_locator}")
+        # Click and Handle Tab
         home.safe_click(locator)
+        home.handle_external_tab()
         
-
-        # Log current URL to trace the redirection
-        current_url = home.driver.current_url.lower()
-        self.logger.info(f"Redirection landed on: {current_url}")
-
-        if button_locator == "BUTTON_READ_ME":
-            assert "about" in current_url
-            self.logger.info("About page URL verified successfully.")
-        elif button_locator == "BUTTON_VIEW_ALL_SERVICES":
-            assert "services" in current_url
-            self.logger.info("Services page URL verified successfully.")
-
-        # Go back to home for the next parameter (optional, depending on your setup)
-        self.logger.info("Navigating back to Home Page...")
-        home.navigate()
+        # SENIOR MOVE: Use Logic Layer instead of hardcoded 'if/elif' blocks
+        expected_slug = HomeLogic.get_url_expectation(button_locator)
+        home.wait.until(
+            EC.url_contains(expected_slug), 
+            f"Failed to reach {expected_slug}. Current URL: {home.driver.current_url}"
+        )
 
         self.logger.info(f"--- FINISH: Navigation Test for {button_locator} ---")
         
@@ -65,22 +53,22 @@ class TestHomePage:
         "BUTTON_BOOK_AN_APPOINTMENT_1",
         "BUTTON_BOOK_AN_APPOINTMENT_2",
         "BUTTON_BOOK_AN_APPOINTMENT_3",
+        "BUTTON_BOOK_AN_APPOINTMENT_4",
         "BUTTON_SCHEDULE_NOW"
     ])
-
-
     def test_appointment_buttons_navigation(self, home, button_locator):
+        self.logger.info(f"--- START: Appointment Button Navigation Test for {button_locator} ---")
         home.navigate()
         locator = getattr(home, button_locator)
         
-        # Use the force_click for the external link
         home.force_click(locator) 
-        
-        # Handle the tab switch
         home.handle_external_tab()
         
-        assert "calipain.com" not in home.driver.current_url.lower()
+        # Strong assertion using Logic Layer
+        expected = HomeLogic.get_url_expectation(button_locator)
+        home.wait.until(EC.url_contains(expected), f"Booking page not reached via {button_locator}")
 
+        self.logger.info(f"--- FINISH: Appointment Button Navigation Test for {button_locator} ---")
 
 
 # Since scope of the setup_logger is "function", it runs before each test method.  
@@ -119,10 +107,8 @@ class TestCarousel:
         
         # 4. Fixed logic: rating is a string, check membership directly
         rating_text = home.driver.find_element(*home.CAROUSEL_RATING).text
-        self.logger.info(f"Captured Footer Rating: {rating_text}")
-        
-        # Use .upper() to make the test case-insensitive and robust
-        assert "EXCELLENT" in rating_text.upper(), f"Expected 'EXCELLENT' not found in: {rating_text}"
+        assert HomeLogic.is_rating_valid(rating_text), f"Unexpected rating: {rating_text}"
+        self.logger.info(f"Captured and verified Footer Rating: {rating_text}")
 
         self.logger.info("--- FINISH: Carousel Footer Rating Verification ---")
 

@@ -1,5 +1,6 @@
 from selenium.webdriver.common.by import By
 from pages.base import BasePage
+from src.logic.home_logic import HomeLogic
 
 class HomePage(BasePage):
     def __init__(self, driver):
@@ -27,8 +28,8 @@ class HomePage(BasePage):
 
    
     def navigate(self):
-        # self.info("Navigating to base URL") # Output: [HomePage] Navigating to base URL
-        self.open_url("")   # Navigate to base URL
+        """Uses the Logic Layer to navigate home."""
+        self.open_url(HomeLogic.EXPECTED_PATH)  
 
 
 
