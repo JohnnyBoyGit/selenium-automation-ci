@@ -41,4 +41,5 @@ jobs:
             reports/report.html
             logs/
           overwrite: true  # Optional safety net
+          if-no-files-found: ignore  # <--- Use this to prevent Exit Code 1
 
