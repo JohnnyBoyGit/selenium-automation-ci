@@ -37,6 +37,8 @@ jobs:
         if: always()
         with:
           name: selenium-test-report-run-${{ github.run_number }}
-          path: reports/report.html
+          path: |
+            reports/report.html
+            logs/
           overwrite: true  # Optional safety net
 
