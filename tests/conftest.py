@@ -6,8 +6,10 @@ from pytest_html import extras
 import base64
 import os
 from selenium.webdriver.chrome.options import Options
-from pages.home import HomePage  # Import specific pages
+from pages.home import HomePage  
 from utils.custom_logger import LogGen
+
+
 
 @pytest.fixture
 def home(driver):
@@ -71,7 +73,6 @@ def setup_logger(request):
     request.cls.logger = logging.LoggerAdapter(raw_logger, {"page_name": "TestContext"})
 
 
-
 # Enhanced driver fixture with stealth settings to avoid detection by anti-automation scripts.
 @pytest.fixture(scope="function")
 def driver(request):
@@ -112,6 +113,7 @@ def driver(request):
     yield driver
     
     driver.quit()
+
 
 @pytest.fixture(autouse=True)
 def cleanup_tabs(driver):

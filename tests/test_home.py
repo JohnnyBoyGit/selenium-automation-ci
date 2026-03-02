@@ -76,7 +76,8 @@ class TestHomePage:
 @pytest.mark.usefixtures("setup_logger")                                               
 class TestCarousel:
 
-    def test_slide_footer_rating(self, home):
+    def test_slide_footer_rating(self, home):     
+        self.logger.info(f"Test running on session: {home.driver.session_id}")   
         self.logger.info("--- START: Carousel Footer Rating Verification ---")
         home.navigate()
         
@@ -301,9 +302,15 @@ class TestCarousel:
 
                 # --- WAIT FOR ANIMATION TO FINISH ---
                 # This waits until the height is actually greater than the initial height
-                self.logger.info("Waiting for slide to expand...")
-                home.wait.until(lambda d: text_container.size['height'] > initial_height)
+                # self.logger.info("Waiting for slide to expand...")
+                # home.wait.until(lambda d: text_container.size['height'] > initial_height)
                 
+                # --- WAIT FOR ANIMATION TO FINISH ---
+                self.logger.info("Waiting for slide to expand...")
+                # Use a lambda that ensures the height has actually settled
+                home.wait.until(lambda d: int(text_container.size['height']) > int(initial_height))
+
+
                 # --- ASSERT HEIGHT INCREASED ---
                 expanded_height = text_container.size['height']
                 assert expanded_height > initial_height, f"Slide height did not increase. Initial: {initial_height}, Expanded: {expanded_height}"
@@ -319,12 +326,20 @@ class TestCarousel:
                 
                 # 2. CRITICAL: Wait for the height to shrink back to the original size
                 # This handles the 0.3s - 0.5s CSS animation
-                home.wait.until(lambda d: text_container.size['height'] == initial_height)
+                # home.wait.until(lambda d: text_container.size['height'] == initial_height)
+
+                # 2. CRITICAL: Wait for the height to shrink back
+                # Use <= and int() to avoid float/sub-pixel mismatches on cloud browsers
+                home.wait.until(lambda d: int(text_container.size['height']) <= int(initial_height))
                 self.logger.info("Slide collapsed back to initial height.")
 
                 # --- ASSERT HEIGHT RETURNED TO NORMAL ---
                 final_height = text_container.size['height']
-                assert final_height == initial_height, f"Collapse failed! Final: {final_height}, Expected: {initial_height}"
+                # assert final_height == initial_height, f"Collapse failed! Final: {final_height}, Expected: {initial_height}"
+
+                # Allow a 2-pixel margin for browser rendering differences
+                assert abs(final_height - initial_height) <= 2, f"Collapse failed! Final: {final_height}, Expected: {initial_height}"
+
                 self.logger.info(f"Collapse successful. Final Height: {final_height}")
                 self.logger.info("--- FINISH: Carousel Slide Expansion and Collapse Test ---")
 
