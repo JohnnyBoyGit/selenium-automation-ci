@@ -13,17 +13,18 @@ class LogGen:
         # log_name = f"automation_{worker_id}.log" if worker_id else "automation.log"
         
         worker_id = os.environ.get("PYTEST_XDIST_WORKER")
+        log_name = f"automation_{worker_id}.log" if worker_id else "automation.log"
 
-        if worker_id:
-            # Parallel Mode (gw0, gw1, etc.)
-            log_name = f"automation_{worker_id}.log"
-        else:
-            # Sequential Mode (Standard)
-            log_name = "automation.log"
-
-        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "logs", log_name)
+        # 1. Define the directory path
+        log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "logs")
         
-        # 3. Configure formatting
+        # 2. ADD THIS LINE: This creates the 'logs' folder on the GitHub Runner
+        os.makedirs(log_dir, exist_ok=True)
+        
+        # 3. Join with the filename
+        path = os.path.join(log_dir, log_name)
+        
+        # 4. Configure formatting
         # Use [%(processName)s] instead of threadName for xdist workers
         # We add [%(page_name)s] as a placeholder
         log_format = f'%(asctime)s: %(levelname)s: [{worker_id}] [%(page_name)s] %(message)s'
