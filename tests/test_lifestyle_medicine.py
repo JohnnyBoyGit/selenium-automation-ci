@@ -2,6 +2,7 @@ from pages.lifestyle_medicine import LifestyleMedicinePage
 import pytest
 from selenium.webdriver.support import expected_conditions as EC
 from src.logic.lifestyle_medicine_logic import LifestyleMedicineLogic
+from src.logic.common_logic import CommonLogic
 import time
 
 @pytest.mark.usefixtures("setup_logger")
@@ -10,8 +11,8 @@ class TestLifestyleMedicinePage:  # Lifestyle Medicine Page
     def test_lifestyle_medicine_page_title(self, lifestyle_medicine):
         self.logger.info("--- START: Lifestyle Medicine Page Title Test ---")
         lifestyle_medicine.navigate()
-        assert lifestyle_medicine.element_is_visible(LifestyleMedicinePage.LIFESTYLE_MEDICINE_TITLE), "Lifestyle Medicine page title is not visible"
-        actual_title = lifestyle_medicine.driver.find_element(*LifestyleMedicinePage.LIFESTYLE_MEDICINE_TITLE).text
+        assert lifestyle_medicine.element_is_visible(lifestyle_medicine.LIFESTYLE_MEDICINE_TITLE), "Lifestyle Medicine page title is not visible"
+        actual_title = lifestyle_medicine.driver.find_element(*lifestyle_medicine.LIFESTYLE_MEDICINE_TITLE).text
         assert LifestyleMedicineLogic.EXPECTED_TITLE in actual_title.upper()
         self.logger.info("--- FINISH: Lifestyle Medicine Page Title Test ---")
         
@@ -20,7 +21,7 @@ class TestLifestyleMedicinePage:  # Lifestyle Medicine Page
         lifestyle_medicine.navigate() 
         self.logger.info("Navigated to Lifestyle Medicine page.")
 
-        locator = LifestyleMedicinePage.IV_THERAPY_SERVICES
+        locator = lifestyle_medicine.IV_THERAPY_SERVICES
         assert lifestyle_medicine.element_is_visible(locator), "IV Therapy Services link is not visible on page"
 
         # GET EXPECTATION FROM LOGIC LAYER
@@ -54,8 +55,8 @@ class TestLifestyleMedicinePage:  # Lifestyle Medicine Page
 
         self.logger.info("Clicking Hair Restoration link to show content.")
         lifestyle_medicine.force_click(lifestyle_medicine.HAIR_RESTORATION)
-        assert lifestyle_medicine.element_is_visible(LifestyleMedicinePage.HAIR_RESTORATION_CONTENT), "Hair Restoration content is not visible"
-        lifestyle_medicine.wait.until(EC.visibility_of_element_located(LifestyleMedicinePage.HAIR_RESTORATION_CONTENT))
+        assert lifestyle_medicine.element_is_visible(lifestyle_medicine.HAIR_RESTORATION_CONTENT), "Hair Restoration content is not visible"
+        lifestyle_medicine.wait.until(EC.visibility_of_element_located(lifestyle_medicine.HAIR_RESTORATION_CONTENT))
 
         self.logger.info("Clicking Hair Restoration link again to hide content.")
         lifestyle_medicine.force_click(lifestyle_medicine.HAIR_RESTORATION)
@@ -68,9 +69,9 @@ class TestLifestyleMedicinePage:  # Lifestyle Medicine Page
         self.logger.info("Navigated to Lifestyle Medicine page.")
 
         self.logger.info("Opening Hair Restoration Accordion...")
-        lifestyle_medicine.force_click(LifestyleMedicinePage.HAIR_RESTORATION)
+        lifestyle_medicine.force_click(lifestyle_medicine.HAIR_RESTORATION)
 
-        link_locator = LifestyleMedicinePage.HAIR_RESTORATION_CONTENT_LINK
+        link_locator = lifestyle_medicine.HAIR_RESTORATION_CONTENT_LINK
         lifestyle_medicine.wait.until(
             EC.visibility_of_element_located(link_locator),
             "Hair Restoration content link did not become visible after clicking accordion"
@@ -107,10 +108,10 @@ class TestLifestyleMedicinePage:  # Lifestyle Medicine Page
         
          # 1. Action: Click to show
         self.logger.info("Clicking Revitalize link to show content.")
-        lifestyle_medicine.force_click(LifestyleMedicinePage.REVITALIZE)
+        lifestyle_medicine.force_click(lifestyle_medicine.REVITALIZE)
         
         # 2. Senior Verification: Wait for animation/visibility
-        content_locator = LifestyleMedicinePage.REVITALIZE_CONTENT
+        content_locator = lifestyle_medicine.REVITALIZE_CONTENT
         lifestyle_medicine.wait.until(
             EC.visibility_of_element_located(content_locator),
             "Revitalize content did not become visible after click"
@@ -119,7 +120,7 @@ class TestLifestyleMedicinePage:  # Lifestyle Medicine Page
         
         # 3. Action: Click to hide
         self.logger.info("Clicking Revitalize link again to hide content.")
-        lifestyle_medicine.force_click(LifestyleMedicinePage.REVITALIZE)
+        lifestyle_medicine.force_click(lifestyle_medicine.REVITALIZE)
         # (Optional: check for invisibility if the site hides the DOM element)
         self.logger.info("--- FINISH: Toggle Revitalize Content Test ---")
 
@@ -131,9 +132,9 @@ class TestLifestyleMedicinePage:  # Lifestyle Medicine Page
         
         self.logger.info("Clicking Revitalize link to show content.")
          # Must open the accordion first
-        lifestyle_medicine.force_click(LifestyleMedicinePage.REVITALIZE)
+        lifestyle_medicine.force_click(lifestyle_medicine.REVITALIZE)
 
-        assert lifestyle_medicine.element_is_visible(LifestyleMedicinePage.REVITALIZE_CONTENT), "Revitalize content is not visible"
+        assert lifestyle_medicine.element_is_visible(lifestyle_medicine.REVITALIZE_CONTENT), "Revitalize content is not visible"
 
         # Get expected URL from our logic layer
         expected_url = LifestyleMedicineLogic.get_url_expectation("REVITALIZE")
@@ -157,24 +158,24 @@ class TestLifestyleMedicinePage:  # Lifestyle Medicine Page
         """Standardized SIT check using CommonLogic."""
         self.logger.info("--- START: Lifestyle Medicine Phone and Address Integrity Test ---")
         lifestyle_medicine.navigate()
-        assert lifestyle_medicine.element_is_visible(LifestyleMedicinePage.PHONE), "Phone is not visible"
-        assert lifestyle_medicine.element_is_visible(LifestyleMedicinePage.ADDRESS), "Address is not visible"
+        assert lifestyle_medicine.element_is_visible(lifestyle_medicine.PHONE), "Phone is not visible"
+        assert lifestyle_medicine.element_is_visible(lifestyle_medicine.ADDRESS), "Address is not visible"
         
-        phone_text = lifestyle_medicine.driver.find_element(*LifestyleMedicinePage.PHONE).text
+        phone_text = lifestyle_medicine.driver.find_element(*lifestyle_medicine.PHONE).text
         assert LifestyleMedicineLogic.is_valid_phone_format(phone_text)
         
-        address_text = lifestyle_medicine.driver.find_element(*LifestyleMedicinePage.ADDRESS).text
+        address_text = lifestyle_medicine.driver.find_element(*lifestyle_medicine.ADDRESS).text
         assert LifestyleMedicineLogic.is_valid_address(address_text)
         self.logger.info("--- FINISH: Lifestyle Medicine Phone and Address Integrity Test ---")
 
     def test_validation_icons(self, lifestyle_medicine):
         self.logger.info("--- START: Lifestyle Medicine Validation Icons Test ---")
         lifestyle_medicine.navigate()
-        assert lifestyle_medicine.element_is_visible(LifestyleMedicinePage.PHONE_ICON), "Phone icon is not visible"
-        assert lifestyle_medicine.element_is_visible(LifestyleMedicinePage.ADDRESS_ICON), "Address icon is not visible"
+        assert lifestyle_medicine.element_is_visible(lifestyle_medicine.PHONE_ICON), "Phone icon is not visible"
+        assert lifestyle_medicine.element_is_visible(lifestyle_medicine.ADDRESS_ICON), "Address icon is not visible"
         self.logger.info("--- FINISH: Lifestyle Medicine Validation Icons Test ---")
 
     def test_schedule_now_link(self, lifestyle_medicine):        
         self.logger.info("--- START: Lifestyle Medicine Schedule Now Test ---")       
-        lifestyle_medicine.sch_now_link_flow()
+        CommonLogic.verify_link_flow(page=lifestyle_medicine, locator=lifestyle_medicine.SCH_NOW_BUTTON, expected_slug="booking", click_type="safe", scroll=True)
         self.logger.info("--- FINISH: Lifestyle Medicine Schedule Now Test ---")

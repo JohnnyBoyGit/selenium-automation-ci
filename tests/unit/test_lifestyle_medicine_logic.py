@@ -6,4 +6,4 @@ def test_lifestyle_url_logic():
     assert LifestyleMedicineLogic.get_url_expectation("HAIR_RESTORATION") == "platelet-rich-plasma-prp"
 
 def test_lifestyle_constants():
-    assert LifestyleMedicineLogic.EXPECTED_PATH == "/lifestyle-medicine-2"
+    assert LifestyleMedicineLogic.EXPECTED_PATH == "lifestyle-medicine-2"

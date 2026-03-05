@@ -3,7 +3,7 @@ from src.logic.common_logic import CommonLogic
 
 class AboutLogic:
     # 1. ADD THIS LINE (This fixes all 7 failures)
-    EXPECTED_PATH = "/about" 
+    EXPECTED_PATH = "about" 
 
     # 2. Keep your existing snippets for internal links
     URL_SNIPPETS = {

@@ -9,7 +9,7 @@ class LifestyleMedicineLogic:
         "REVITALIZE": "infusion-therapy" # Adjust if different
     }
 
-    EXPECTED_PATH = "/lifestyle-medicine-2"
+    EXPECTED_PATH = "lifestyle-medicine-2"
     EXPECTED_TITLE = "LIFESTYLE MEDICINE"
 
     # Reusable common logic

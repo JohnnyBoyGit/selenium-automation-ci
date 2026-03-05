@@ -3,6 +3,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from src.logic.home_logic import HomeLogic
+from src.logic.common_logic import CommonLogic
 
 @pytest.mark.usefixtures("setup_logger")
 class TestHomePage:
@@ -21,54 +22,36 @@ class TestHomePage:
         assert home.footer.element_is_visible(home.footer.FOOTER_SERVICES_PAIN_MANAGEMENT), "Footer text is not visible"
         assert home.footer.element_is_visible(home.footer.FOOTER_SOCIAL_MEDIA_TWITTER), "Social media links are not visible"    
         self.logger.info("Header and Footer verification complete.")
-
-
-    @pytest.mark.parametrize("button_locator", [
-        "BUTTON_READ_ME",
-        "BUTTON_VIEW_ALL_SERVICES"
-    ])
-    def test_buttons_navigation(self, home, button_locator):
-        self.logger.info(f"--- START: Navigation Test for {button_locator} ---")
-        home.navigate()
-
-        locator = getattr(home, button_locator)
-        home.scroll_to_element(locator)
-        assert home.element_is_visible(locator), f"{button_locator} is not visible"
-
-        # Click and Handle Tab
-        home.safe_click(locator)
-        home.handle_external_tab()
-        
-        # SENIOR MOVE: Use Logic Layer instead of hardcoded 'if/elif' blocks
-        expected_slug = HomeLogic.get_url_expectation(button_locator)
-        home.wait.until(
-            EC.url_contains(expected_slug), 
-            f"Failed to reach {expected_slug}. Current URL: {home.driver.current_url}"
-        )
-
-        self.logger.info(f"--- FINISH: Navigation Test for {button_locator} ---")
         
     
-    @pytest.mark.parametrize("button_locator", [
-        "BUTTON_BOOK_AN_APPOINTMENT_1",
-        "BUTTON_BOOK_AN_APPOINTMENT_2",
-        "BUTTON_BOOK_AN_APPOINTMENT_3",
-        "BUTTON_BOOK_AN_APPOINTMENT_4",
-        "BUTTON_SCHEDULE_NOW"
+    # We pass a tuple: (locator_name, click_strategy)
+    @pytest.mark.parametrize("button_name, click_strategy, should_scroll", [
+    ("BUTTON_BOOK_AN_APPOINTMENT_1", "force", False),
+    ("BUTTON_BOOK_AN_APPOINTMENT_2", "force", False),
+    ("BUTTON_BOOK_AN_APPOINTMENT_3", "force", False),
+    ("BUTTON_BOOK_AN_APPOINTMENT_4", "force", False),
+    ("BUTTON_SCHEDULE_NOW", "safe", True),
+    ("BUTTON_READ_ME", "safe", True),           # New addition
+    ("BUTTON_VIEW_ALL_SERVICES", "safe", True)   # New addition
     ])
-    def test_appointment_buttons_navigation(self, home, button_locator):
-        self.logger.info(f"--- START: Appointment Button Navigation Test for {button_locator} ---")
-        home.navigate()
-        locator = getattr(home, button_locator)
+    def test_home_navigation_elements(self, home, button_name, click_strategy, should_scroll):
+        self.logger.info(f"--- START: Navigation Test for {button_name} ---")
         
-        home.force_click(locator) 
-        home.handle_external_tab()
+        # 1. Dynamically get data from Home/Logic
+        locator = getattr(home, button_name)
+        expected = HomeLogic.get_url_expectation(button_name)
         
-        # Strong assertion using Logic Layer
-        expected = HomeLogic.get_url_expectation(button_locator)
-        home.wait.until(EC.url_contains(expected), f"Booking page not reached via {button_locator}")
+        # 2. Use the "Engine" (CommonLogic)
+        # This single line handles: navigate, scroll (if True), click (type), tab switch, and URL wait
+        CommonLogic.verify_link_flow(
+            page=home, 
+            locator=locator, 
+            expected_slug=expected, 
+            click_type=click_strategy,
+            scroll=should_scroll
+        )
 
-        self.logger.info(f"--- FINISH: Appointment Button Navigation Test for {button_locator} ---")
+        self.logger.info(f"--- FINISH: Navigation Test for {button_name} ---")
 
 
 # Since scope of the setup_logger is "function", it runs before each test method.  

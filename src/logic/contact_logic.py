@@ -3,7 +3,7 @@ from src.logic.common_logic import CommonLogic
 
 class ContactLogic:
 
-    EXPECTED_PATH = "/contact"
+    EXPECTED_PATH = "contact"
     
     CORE_DATA = {
         "ZIP_CODE": "91436",

@@ -2,6 +2,7 @@ import pytest
 from selenium.webdriver.support import expected_conditions as EC
 from pages.services import ServicesPage
 from src.logic.services_logic import ServicesLogic
+from src.logic.common_logic import CommonLogic
 
 @pytest.mark.usefixtures("setup_logger")
 class TestServicesPage:
@@ -32,25 +33,27 @@ class TestServicesPage:
         
         self.logger.info("--- FINISH: Services Image Links Test for {image_key}---")
 
-    @pytest.mark.parametrize("service_key", ServicesPage.APPOINTMENT_DATA.keys())   # use the keys from APPOINTMENT_DATA dictionary
-    def test_appointment_links(self, services, service_key):
-        self.logger.info("--- START: Services Appointment Links Test ---") 
-        # Use the services_page's own navigation
-        services.navigate() 
-        self.logger.info("Navigated to Services page.")
+    @pytest.mark.parametrize("service_key", ServicesPage.APPOINTMENT_DATA.keys())
+    def test_service_appointment_links(self, services, service_key):
+        self.logger.info(f"--- START: Services Appointment Link Test for {service_key} ---") 
         
-        # Call the dynamic locator method instead of getattr
+        # 1. Get the dynamic locator (Method you already have in ServicesPage)
         locator = services.get_appointment_locator(service_key)
         
-         # Click the link
-        self.logger.info(f"Clicking appointment link for {service_key} with safe_click: {locator}")
-        services.safe_click(locator)
-        self.logger.info("Handling external tab if opened...")
-        services.handle_external_tab()
-         
-         # Verify navigation to the booking page
-        assert "booking" in services.driver.current_url.lower()
-        self.logger.info("--- FINISH: Services Appointment Links Test ---")
+        # 2. Define the expectation (usually "booking" for all services)
+        expected = "booking" 
+        
+        # 3. Use the UNIFIED Engine
+        # Note: Services usually need 'safe' click and 'scroll' to be True
+        CommonLogic.verify_link_flow(
+            page=services, 
+            locator=locator, 
+            expected_slug=expected, 
+            click_type="safe",
+            scroll=True
+        )
+
+        self.logger.info(f"--- FINISH: Services Appointment Link Test for {service_key} ---")
 
 
         

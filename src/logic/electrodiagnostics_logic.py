@@ -4,7 +4,7 @@ from src.logic.common_logic import CommonLogic
 class ElectroDiagnosticsLogic:
     # SIT expectations
     EXPECTED_TITLE_PART = "ELECTRODIAGNOSTIC"
-    EXPECTED_PATH = "/electrodiagnostic"
+    EXPECTED_PATH = "electrodiagnostic"
     
     # We just link to the common logic here
     is_valid_phone_format = CommonLogic.is_valid_phone_format

@@ -2,7 +2,7 @@
 
 class ServicesLogic:
 
-    EXPECTED_PATH = "/services"
+    EXPECTED_PATH = "services"
     # Moved from the Page Object to Logic
     IMAGE_SLUGS = {
         "PAIN": "pain-management",

@@ -4,9 +4,9 @@ class HeaderLogic:
     NAV_MAP = {
         "SITE_LOGO": "calipain.com",
         "HOME_MENU_ITEM": "calipain.com",
-        "ABOUT_MENU_ITEM": "/about",
-        "SERVICES_MENU_ITEM": "/services",
-        "CONTACT_MENU_ITEM": "/contact",
+        "ABOUT_MENU_ITEM": "about",
+        "SERVICES_MENU_ITEM": "services",
+        "CONTACT_MENU_ITEM": "contact",
         "SERVICES_SUBMENU_PAIN_MANAGEMENT": "pain-management",
         "SERVICES_SUBMENU_ELECTRODIAGNOSTICS": "electrodiagnostic",
         "SERVICES_SUBMENU_INDEPENDENT_MEDICAL_EXAMS": "independent-medical-exams",

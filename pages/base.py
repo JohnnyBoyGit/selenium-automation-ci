@@ -6,29 +6,27 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from utils.custom_logger import LogGen
-
+from utils.read_config import ReadConfig
 
 class BasePage:
     def __init__(self, driver):
         self.driver = driver
         self.wait = WebDriverWait(driver, 10)
-        self.base_url = "https://calipain.com/"
+        self.base_url = ReadConfig.get_application_url()
         
-        current_class = self.__class__.__name__
-
-        # 1. Get the base logger
+        # Initialize logger
         base_logger = LogGen.loggen()
-        
-        # 2. Wrap it so it automatically injects the class name
         self.logger = logging.LoggerAdapter(base_logger, {"page_name": self.__class__.__name__})
-        
-        if current_class not in ["HeaderComponent", "FooterComponent"]:
-            from pages.components.header_component import HeaderComponent
-            from pages.components.footer_component import FooterComponent
-            
-            # Use the local imports to set the attributes
-            self.header = HeaderComponent(driver)
-            self.footer = FooterComponent(driver)
+
+    @property
+    def header(self):
+        from pages.components.header_component import HeaderComponent
+        return HeaderComponent(self.driver)
+
+    @property
+    def footer(self):
+        from pages.components.footer_component import FooterComponent
+        return FooterComponent(self.driver)
 
     def open_url(self, path=""):
         base_url = "https://calipain.com/"
@@ -40,7 +38,6 @@ class BasePage:
         self.logger.info(f"Finding element: {locator}")
         return self.wait.until(EC.visibility_of_element_located(locator))
 
-    from time import sleep # Direct import to avoid 'builtin_function_or_method' error
 
     def safe_click(self, locator):
         self.logger.info(f"Attempting safe_click on: {locator}")
@@ -109,7 +106,6 @@ class BasePage:
         )
         self.wait.until(EC.visibility_of_element_located(locator))
 
-    from selenium.webdriver.support.ui import WebDriverWait
 
     def handle_external_tab(self, timeout=10):
         """
@@ -143,38 +139,4 @@ class BasePage:
         ActionChains(self.driver).move_to_element(element).perform()
 
 
-    def sch_now_link_flow(self, expected_slug="booking"):
-        """
-        Coordinates the booking link verification.
-        No need to pass 'pagefixture' because 'self' is the page object.
-        """
-        # Add this to confirm the page object is created correctly
-        self.logger.info(f"Starting 'Schedule Now' flow for: {self.__class__.__name__}")
-        
-        # 1. Navigate to the page
-        # This calls the navigate() method of whichever page is currently running
-        self.navigate() 
-        
-        # 2. Get the locator from the specific Page Object (self)
-        # Note: This assumes every page using this has a SCH_NOW_BUTTON defined
-        locator = self.SCH_NOW_BUTTON
-        
-        self.logger.info(f"Targeting booking link with locator: {locator}")
-        self.scroll_to_element(locator)
-
-        # 3. Click and handle tabs
-        #self.force_click(locator)
-        self.safe_click(locator)
-        self.handle_external_tab()
-
-        # 4. Wait for URL change
-        try:
-            self.logger.info(f"Verifying URL contains slug: '{expected_slug}'")
-            self.wait.until(EC.url_contains(expected_slug))
-            self.logger.info("Verification successful.")
-        except Exception as e:
-            # Use actual_url variable to keep the log clean
-            actual_url = self.driver.current_url
-            self.logger.error(f"Mismatch! Search Slug: '{expected_slug}' | Actual URL: {actual_url}")
-            raise e
-
+    
