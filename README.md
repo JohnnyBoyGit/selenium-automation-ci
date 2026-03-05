@@ -1,4 +1,4 @@
-# CaliPain Automation Suite
+# CaliPain Automation Suite 
 
 [![Selenium Python CI](https://github.com/JohnnyBoyGit/selenium-automation-ci/actions/workflows/regression.yml/badge.svg)](https://github.com/JohnnyBoyGit/selenium-automation-ci/actions/workflows/regression.yml)
 
