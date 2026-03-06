@@ -22,4 +22,4 @@ COPY . .
 
 # STEP 6: Execute
 # We run Unit Tests first to follow the Test Pyramid!
-CMD ["pytest", "tests/unit", "tests/test_home.py"]
+CMD ["pytest"]
