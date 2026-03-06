@@ -22,17 +22,18 @@ jobs:
           pip install pytest pytest-html selenium pytest-xdist pytest-bdd  # <--- Add it here
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Create Reports Directory
-        run: mkdir -p reports
-
       - name: Run Selenium Tests
-        env:
-          PYTHONPATH: .
         run: |
-          python -m pytest  # Using 'python -m' ensures the correct environment is used
+          # -p force-loads the plugins to prevent 'Unrecognized Argument' errors
+          python -m pytest tests/ \
+            -p xdist \
+            -p pytest_html \
+            -n 2 \
+            --ignore=tests/unit \
+            --html=reports/report.html \
+            --self-contained-html \
+            --css=assets/style.css
         if: always()
-
-
 
       - name: Upload Test Report Artifact
         uses: actions/upload-artifact@v4
