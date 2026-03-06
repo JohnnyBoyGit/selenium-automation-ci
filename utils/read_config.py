@@ -6,7 +6,7 @@ import os
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # 3. Build the path to the config file (Works on both Windows and Linux)
-CONFIG_PATH = os.path.join(PROJECT_ROOT, "Configurations", "config.ini")
+CONFIG_PATH = os.path.join(PROJECT_ROOT, "configurations", "config.ini")
 
 config = configparser.RawConfigParser()
 
