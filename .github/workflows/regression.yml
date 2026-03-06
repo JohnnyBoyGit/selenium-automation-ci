@@ -28,12 +28,10 @@ jobs:
       - name: Run Selenium Tests
         env:
           PYTHONPATH: .
-        # Use -v (verbose) to see EXACTLY what pytest is doing
-        # 1. Point to the 'tests/' folder instead of specific files
-        # 2. Use -n auto if you want to run in parallel (xdist)
         run: |
-          pytest tests/ -n 2 --ignore=tests/unit --html=reports/report.html --self-contained-html -v
+          pytest
         if: always()
+
 
 
       - name: Upload Test Report Artifact
