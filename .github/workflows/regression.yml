@@ -25,15 +25,7 @@ jobs:
 
       - name: Run Selenium Tests
         run: |
-          # Use -p to force-load plugins. Note: pytest-html is loaded as 'pytest_html'
-          python -m pytest tests/ \
-            -p xdist \
-            -p pytest_html \
-            -n 2 \
-            --ignore=tests/unit \
-            --html=reports/report.html \
-            --self-contained-html \
-            --css=assets/style.css
+          python -m pytest
         if: always()
 
 
