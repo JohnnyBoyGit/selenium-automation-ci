@@ -1,20 +1,18 @@
 import configparser
-import os
+from pathlib import Path
 
-# 1. Get the directory where THIS file (read_config.py) is located
-# 2. Go up one level to get the Project Root
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-# 3. Build the path to the config file (Works on both Windows and Linux)
-CONFIG_PATH = os.path.join(PROJECT_ROOT, "configurations", "config.ini")
+# Path relative to this file: ../../Configurations/config.ini
+# .parent (utils) -> .parent (Project Root)
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+CONFIG_PATH = PROJECT_ROOT / "Configurations" / "config.ini"
 
 config = configparser.RawConfigParser()
 
-# Verify the file actually exists to provide a better error message if it fails
-if not os.path.exists(CONFIG_PATH):
-    raise FileNotFoundError(f"Config file not found at: {CONFIG_PATH}")
+# This will print the EXACT path in the GitHub log if it fails
+if not CONFIG_PATH.exists():
+    raise FileNotFoundError(f"CRITICAL: Config not found at {CONFIG_PATH}")
 
-config.read(CONFIG_PATH)
+config.read(str(CONFIG_PATH))
 
 class ReadConfig:
     @staticmethod
