@@ -63,14 +63,23 @@ def lifestyle_medicine(driver):
 
 @pytest.fixture(scope="function")
 def setup_logger(request):
+    raw_logger = None
+    page_name = "TestContext"
+
+    # 1. Look for an existing logger in other fixtures
     for fixture_value in request.node.funcargs.values():
         if hasattr(fixture_value, "logger"):
-            request.cls.logger = fixture_value.logger
-            return
+            raw_logger = fixture_value.logger
+            # If the fixture has a name (like a Page Object), use it
+            page_name = getattr(fixture_value, "__class__", {}).__name__ or "PageObject"
+            break
             
-    # IMPROVED FALLBACK: If no page object is found, create an adapter with "Test" as the name
-    raw_logger = LogGen.loggen()
-    request.cls.logger = logging.LoggerAdapter(raw_logger, {"page_name": "TestContext"})
+    # 2. If nothing found, generate a new one
+    if raw_logger is None:
+        raw_logger = LogGen.loggen()
+
+    # 3. ALWAYS wrap it in an adapter so 'page_name' is never missing
+    request.cls.logger = logging.LoggerAdapter(raw_logger, {"page_name": page_name})
 
 
 # Enhanced driver fixture with stealth settings to avoid detection by anti-automation scripts.
