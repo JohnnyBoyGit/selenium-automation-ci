@@ -5,8 +5,8 @@ updates:
     schedule:
       interval: "weekly"
 
-  - package-ecosystem: "pip"  # <--- This dash must be directly under the dash above
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    versioning-strategy: increase
+ # - package-ecosystem: "pip"  # <--- This dash must be directly under the dash above
+    # directory: "/"
+    # schedule:
+    #   interval: "weekly"
+    # versioning-strategy: increase
