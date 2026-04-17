@@ -5,10 +5,8 @@ updates:
     schedule:
       interval: "weekly"
 
-  - package-ecosystem: "pip"
+  - package-ecosystem: "pip"  # <--- This dash must be directly under the dash above
     directory: "/"
     schedule:
       interval: "weekly"
-    # This helps Dependabot resolve 3.13 dependencies
     versioning-strategy: increase
-
