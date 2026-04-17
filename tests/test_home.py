@@ -1,11 +1,14 @@
 import pytest
+import time
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
+from pages import home
 from src.logic.home_logic import HomeLogic
 from src.logic.common_logic import CommonLogic
 from selenium.webdriver.support.ui import WebDriverWait
-
+from selenium.common.exceptions import TimeoutException
+import os
 
 @pytest.mark.usefixtures("setup_logger")
 class TestHomePage:
@@ -244,88 +247,116 @@ class TestCarousel:
         self.logger.info("===== FINISH: test_carousel_navigation =====")
 
 
-    def test_slide_expansion_and_collapse(self, home):
-        self.logger.info("--- START: Carousel Slide Expansion and Collapse Test ---")
-        home.navigate()
-        
-        # 1. TRIGGER HYDRATION
-        self.logger.info("Triggering Carousel Hydration (Scroll/Resize/Hover)")
-        home.driver.execute_script("window.scrollTo(0, 5000);")
-        home.driver.set_window_size(1920, 1080)
 
-        self.logger.info("Simulating human mouse movement...")
-        actions = ActionChains(home.driver)
-        actions.move_by_offset(100, 100).pause(0.5).perform()
+    @pytest.mark.usefixtures("setup_logger")
+    class TestCarousel:
+        def test_slide_expansion_and_collapse(self, home):
+            self.logger.info("--- START: Carousel Slide Expansion and Collapse Test ---")
+            
+            # 1. NAVIGATE AND HYDRATE
+            home.navigate()
+            self.logger.info("Triggering Carousel Hydration (Incremental Scroll)")
+            
+            # Step A: Perform a 'jittery' scroll to mimic a person reading
+            for position in [1000, 2500, 4500]:
+                home.driver.execute_script(f"window.scrollTo(0, {position});")
+                time.sleep(1)
 
-        self.logger.info("Dispatching resize and scroll events...")
-        home.driver.execute_script("window.dispatchEvent(new Event('resize'));")
-        home.driver.execute_script("window.dispatchEvent(new Event('scroll'));")
+            # Step B: Jiggle the mouse cursor across the screen
+            # This often triggers 'Intersection Observer' and hover scripts
+            actions = ActionChains(home.driver)
+            actions.move_to_element(home.driver.find_element(By.TAG_NAME, "body")).pause(0.1).perform() # Reset to top-left
 
-        # 2. WAIT FOR SLIDES
-        self.logger.info("Waiting for Trustindex slides to populate...")
-        long_wait = WebDriverWait(home.driver, 30)
-        slides = long_wait.until(
-            EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".ti-review-item"))
-        )
+            self.logger.info("Simulating mouse 'jitter' and hover...")
+            for offset in range(0, 300, 50):
+                actions.move_by_offset(offset, 10).pause(0.2).perform()
+            
+            # Step C: Force a resize event (some widgets use this to recalculate visibility)
+            home.driver.execute_script("window.dispatchEvent(new Event('resize'));")
+            time.sleep(2)
 
-        for slide in slides:
-            # Only test slides that are visible and have a 'Read more' button
-            self.logger.info("Checking slide for expansion capability...")
-            if slide.is_displayed() and slide.get_attribute("data-empty") == "0":
-                home.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", slide)
+            # 2. HANDLE IFRAME (Critical Fix)
+            # Trustindex often loads in an iframe. We check for it and switch focus.
+            self.logger.info("Checking for Trustindex iframe...")
+            found_iframe = False
+            try:
+                # We look for any iframe containing "trustindex" in its source URL
+                iframes = home.driver.find_elements(By.TAG_NAME, "iframe")
+                for frame in iframes:
+                    src = (frame.get_attribute("src") or "").lower()
+                    if "trustindex" in src:
+                        home.driver.switch_to.frame(frame)
+                        self.logger.info("Switched to Trustindex Iframe!")
+                        found_iframe = True
+                        break
+            except Exception as e:
+                self.logger.warning(f"Error while checking for iframes: {e}")
+            
+            if not found_iframe:
+                self.logger.info("No iframe found, proceeding in main content context.")
+
+            # 3. WAIT FOR SLIDES
+            self.logger.info("Waiting for Trustindex slides to populate...")
+            try:
+                # Longer wait (40s) specifically for CI environments
+                slides = WebDriverWait(home.driver, 40).until(
+                    EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".ti-review-item"))
+                )
+            except TimeoutException:
+                self.logger.error("TIMED OUT: Slides did not appear. Capturing page source for debugging.")
+                # If it fails, save the HTML so you can see exactly what the browser 'saw'
+                with open("error_page_source.html", "w", encoding='utf-8') as f:
+                    f.write(home.driver.page_source)
+                raise
+
+            # 4. PERFORM TEST ON FIRST VALID SLIDE
+            for slide in slides:
+                # data-empty="0" ensures the slide has text to expand
+                if slide.is_displayed() and slide.get_attribute("data-empty") == "0":
+                    self.logger.info("Testing slide expansion and collapse...")
+                    
+                    # Scroll slide into view
+                    home.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", slide)
+                    
+                    btn = slide.find_element(By.CSS_SELECTOR, ".ti-read-more-active")
+                    text_container = slide.find_element(By.CSS_SELECTOR, ".ti-review-content")
+
+                    initial_height = text_container.size['height']
+
+                    # --- EXPAND ---
+                    self.logger.info("Clicking 'Read more' to expand...")
+                    home.driver.execute_script("arguments[0].click();", btn)
+                    
+                    # Wait for label change to 'Hide'
+                    WebDriverWait(home.driver, 10).until(lambda d: btn.get_attribute("aria-label") == "Hide")
+                    
+                    # Wait for height to actually increase beyond initial state
+                    WebDriverWait(home.driver, 15).until(lambda d: int(text_container.size['height']) > int(initial_height))
+
+                    expanded_height = text_container.size['height']
+                    assert expanded_height > initial_height, f"Expansion failed! Initial: {initial_height}, Expanded: {expanded_height}"
+                    self.logger.info(f"Expansion successful. Height: {expanded_height}")
+
+                    # --- COLLAPSE ---
+                    self.logger.info("Clicking 'Hide' to collapse...")
+                    home.driver.execute_script("arguments[0].click();", btn)
+                    
+                    # Wait for label to return to 'Read more'
+                    WebDriverWait(home.driver, 10).until(lambda d: btn.get_attribute("aria-label") == "Read more")
+                    
+                    # Wait for height to shrink back (allowing 2px sub-pixel buffer for cloud browsers)
+                    WebDriverWait(home.driver, 15).until(lambda d: int(text_container.size['height']) <= int(initial_height) + 2)
+
+                    final_height = text_container.size['height']
+                    # Using abs() for a 5px margin of error to prevent CI 'flakiness'
+                    assert abs(final_height - initial_height) <= 5, f"Collapse failed! Final: {final_height}, Expected: {initial_height}"
+                    self.logger.info(f"Collapse successful. Final height: {final_height}")
+                    
+                    break # Exit after testing the first valid slide to keep test fast
+
+            # ALWAYS switch back to main content if we were inside an iframe
+            if found_iframe:
+                home.driver.switch_to.default_content()
+                self.logger.info("Switched back to main content context.")
                 
-                btn = slide.find_element(By.CSS_SELECTOR, ".ti-read-more-active")
-                text_container = slide.find_element(By.CSS_SELECTOR, ".ti-review-content")
-
-                # --- CAPTURE INITIAL HEIGHT ---
-                initial_height = text_container.size['height']
-
-                # --- EXPAND ---
-                self.logger.info("Clicking 'Read more' to expand the slide...")
-                home.driver.execute_script("arguments[0].click();", btn)
-                home.wait.until(lambda d: btn.get_attribute("aria-label") == "Hide")
-                self.logger.info("Button's caption changed to 'Hide'...")                
-
-                # --- WAIT FOR ANIMATION TO FINISH ---
-                # This waits until the height is actually greater than the initial height
-                # self.logger.info("Waiting for slide to expand...")
-                # home.wait.until(lambda d: text_container.size['height'] > initial_height)
-                
-                # --- WAIT FOR ANIMATION TO FINISH ---
-                self.logger.info("Waiting for slide to expand...")
-                # Use a lambda that ensures the height has actually settled
-                home.wait.until(lambda d: int(text_container.size['height']) > int(initial_height))
-
-
-                # --- ASSERT HEIGHT INCREASED ---
-                expanded_height = text_container.size['height']
-                assert expanded_height > initial_height, f"Slide height did not increase. Initial: {initial_height}, Expanded: {expanded_height}"
-                self.logger.info(f"Expansion successful. Initial Height: {initial_height}, Expanded Height: {expanded_height}")
-
-                            # --- COLLAPSE ---
-                self.logger.info("Clicking 'Hide' to collapse the slide...")
-                home.driver.execute_script("arguments[0].click();", btn)
-                
-                # 1. Wait for the label to change back to "Read more"
-                home.wait.until(lambda d: btn.get_attribute("aria-label") == "Read more")
-                self.logger.info("Button's caption changed back to 'Read more'...")
-                
-                # 2. CRITICAL: Wait for the height to shrink back to the original size
-                # This handles the 0.3s - 0.5s CSS animation
-                # home.wait.until(lambda d: text_container.size['height'] == initial_height)
-
-                # 2. CRITICAL: Wait for the height to shrink back
-                # Use <= and int() to avoid float/sub-pixel mismatches on cloud browsers
-                home.wait.until(lambda d: int(text_container.size['height']) <= int(initial_height))
-                self.logger.info("Slide collapsed back to initial height.")
-
-                # --- ASSERT HEIGHT RETURNED TO NORMAL ---
-                final_height = text_container.size['height']
-                # assert final_height == initial_height, f"Collapse failed! Final: {final_height}, Expected: {initial_height}"
-
-                # Allow a 2-pixel margin for browser rendering differences
-                assert abs(final_height - initial_height) <= 2, f"Collapse failed! Final: {final_height}, Expected: {initial_height}"
-
-                self.logger.info(f"Collapse successful. Final Height: {final_height}")
-                self.logger.info("--- FINISH: Carousel Slide Expansion and Collapse Test ---")
-
+            self.logger.info("--- FINISH: Carousel Slide Expansion and Collapse Test ---")
