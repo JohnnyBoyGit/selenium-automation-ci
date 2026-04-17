@@ -1,17 +1,14 @@
 version: 2
 updates:
-  # 1. Keep GitHub Actions versions updated
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-    groups:
-      actions:
-        patterns:
-          - "actions/*" # Group all 'actions/...' PRs into one to avoid spam
 
-  # 2. Keep Python dependencies (Selenium, Pytest, etc.) updated
   - package-ecosystem: "pip"
-    directory: "/" # Assumes your requirements.txt is in the root
+    directory: "/"
     schedule:
       interval: "weekly"
+    # This helps Dependabot resolve 3.13 dependencies
+    versioning-strategy: increase
+
