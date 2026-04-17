@@ -4,6 +4,8 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from src.logic.home_logic import HomeLogic
 from src.logic.common_logic import CommonLogic
+from selenium.webdriver.support.ui import WebDriverWait
+
 
 @pytest.mark.usefixtures("setup_logger")
 class TestHomePage:
@@ -261,7 +263,8 @@ class TestCarousel:
 
         # 2. WAIT FOR SLIDES
         self.logger.info("Waiting for Trustindex slides to populate...")
-        slides = home.wait.until(
+        long_wait = WebDriverWait(home.driver, 30)
+        slides = long_wait.until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".ti-review-item"))
         )
 
