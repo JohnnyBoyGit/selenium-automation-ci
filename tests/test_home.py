@@ -8,7 +8,7 @@ from src.logic.home_logic import HomeLogic
 from src.logic.common_logic import CommonLogic
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
-import os
+
 
 @pytest.mark.usefixtures("setup_logger")
 class TestHomePage:
