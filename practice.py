@@ -54,4 +54,5 @@ def generate_unique_locators(url):
             continue
     driver.quit()
 
+# Run to generate unique locators for the specified URL
 generate_unique_locators("https://calipain.com/")
